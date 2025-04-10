@@ -2,6 +2,8 @@ import {
   categories, type Category, type InsertCategory,
   products, type Product, type InsertProduct 
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Category operations
@@ -29,93 +31,90 @@ export interface IStorage {
   }): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private categories: Map<number, Category>;
-  private products: Map<number, Product>;
-  private categoryCurrentId: number;
-  private productCurrentId: number;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.categories = new Map();
-    this.products = new Map();
-    this.categoryCurrentId = 1;
-    this.productCurrentId = 1;
-    
     // Initialize with default categories
     this.initDefaultCategories();
   }
 
   private async initDefaultCategories() {
-    const defaultCategories: InsertCategory[] = [
-      { name: "Lebensmittel", slug: "lebensmittel" },
-      { name: "Getränke", slug: "getranke" },
-      { name: "Haushalt", slug: "haushalt" },
-      { name: "Sonstiges", slug: "sonstiges" }
-    ];
+    // Check if categories table is empty
+    const existingCategories = await db.select().from(categories);
     
-    for (const category of defaultCategories) {
-      await this.createCategory(category);
+    if (existingCategories.length === 0) {
+      const defaultCategories: InsertCategory[] = [
+        { name: "Lebensmittel", slug: "lebensmittel" },
+        { name: "Getränke", slug: "getranke" },
+        { name: "Haushalt", slug: "haushalt" },
+        { name: "Sonstiges", slug: "sonstiges" }
+      ];
+      
+      for (const category of defaultCategories) {
+        await this.createCategory(category);
+      }
     }
   }
 
   // Category operations
   async getCategories(): Promise<Category[]> {
-    return Array.from(this.categories.values());
+    return await db.select().from(categories);
   }
 
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
-    return Array.from(this.categories.values()).find(
-      (category) => category.slug === slug
-    );
+    const result = await db.select().from(categories).where(eq(categories.slug, slug));
+    return result[0];
   }
 
   async createCategory(insertCategory: InsertCategory): Promise<Category> {
-    const id = this.categoryCurrentId++;
-    const category: Category = { ...insertCategory, id };
-    this.categories.set(id, category);
-    return category;
+    const result = await db.insert(categories).values(insertCategory).returning();
+    return result[0];
   }
 
   // Product operations
   async getProducts(): Promise<Product[]> {
-    return Array.from(this.products.values());
+    return await db.select().from(products);
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
+    const result = await db.select().from(products).where(eq(products.id, id));
+    return result[0];
   }
 
   async getProductByBarcode(barcode: string): Promise<Product | undefined> {
-    return Array.from(this.products.values()).find(
-      (product) => product.barcode === barcode
-    );
+    const result = await db.select().from(products).where(eq(products.barcode, barcode));
+    return result[0];
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const id = this.productCurrentId++;
-    const product: Product = { ...insertProduct, id };
-    this.products.set(id, product);
-    return product;
+    const result = await db.insert(products).values(insertProduct).returning();
+    return result[0];
   }
 
   async updateProduct(id: number, updates: Partial<InsertProduct>): Promise<Product | undefined> {
-    const product = this.products.get(id);
-    if (!product) return undefined;
+    const result = await db.update(products)
+      .set(updates)
+      .where(eq(products.id, id))
+      .returning();
     
-    const updatedProduct = { ...product, ...updates };
-    this.products.set(id, updatedProduct);
-    return updatedProduct;
+    return result[0];
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    return this.products.delete(id);
+    const result = await db.delete(products)
+      .where(eq(products.id, id))
+      .returning({ id: products.id });
+    
+    return result.length > 0;
   }
 
   // Import/Export
   async exportData(): Promise<{ categories: Category[], products: Product[] }> {
+    const categoriesData = await db.select().from(categories);
+    const productsData = await db.select().from(products);
+    
     return {
-      categories: Array.from(this.categories.values()),
-      products: Array.from(this.products.values())
+      categories: categoriesData,
+      products: productsData
     };
   }
 
@@ -127,40 +126,40 @@ export class MemStorage implements IStorage {
       categoryId?: number | null;
     }))[] 
   }): Promise<void> {
-    // Clear existing data
-    this.categories.clear();
-    this.products.clear();
-    
-    // Reset IDs
-    this.categoryCurrentId = 1;
-    this.productCurrentId = 1;
-    
-    // Import categories
-    if (data.categories && data.categories.length) {
-      for (const category of data.categories) {
-        this.categories.set(category.id, category);
-        this.categoryCurrentId = Math.max(this.categoryCurrentId, category.id + 1);
+    // Use a transaction to ensure atomic operation
+    await db.transaction(async (tx) => {
+      // Clear existing data
+      await tx.delete(products);
+      await tx.delete(categories);
+      
+      // Import categories
+      if (data.categories && data.categories.length) {
+        for (const category of data.categories) {
+          await tx.insert(categories).values({
+            id: category.id,
+            name: category.name,
+            slug: category.slug
+          });
+        }
       }
-    }
-    
-    // Import products
-    if (data.products && data.products.length) {
-      for (const rawProduct of data.products) {
-        // Normalize the product to ensure all required fields are present
-        const product: Product = {
-          id: rawProduct.id,
-          name: rawProduct.name,
-          barcode: rawProduct.barcode,
-          image: 'image' in rawProduct ? rawProduct.image ?? null : null,
-          quantity: 'quantity' in rawProduct ? rawProduct.quantity ?? 1 : 1,
-          categoryId: 'categoryId' in rawProduct ? rawProduct.categoryId ?? null : null,
-        };
-        
-        this.products.set(product.id, product);
-        this.productCurrentId = Math.max(this.productCurrentId, product.id + 1);
+      
+      // Import products
+      if (data.products && data.products.length) {
+        for (const rawProduct of data.products) {
+          // Normalize the product to ensure all required fields are present
+          await tx.insert(products).values({
+            id: rawProduct.id,
+            name: rawProduct.name,
+            barcode: rawProduct.barcode,
+            image: 'image' in rawProduct ? rawProduct.image ?? null : null,
+            quantity: 'quantity' in rawProduct ? rawProduct.quantity ?? 1 : 1,
+            categoryId: 'categoryId' in rawProduct ? rawProduct.categoryId ?? null : null,
+          });
+        }
       }
-    }
+    });
   }
 }
 
-export const storage = new MemStorage();
+// Use the database storage implementation instead of in-memory storage
+export const storage = new DatabaseStorage();
