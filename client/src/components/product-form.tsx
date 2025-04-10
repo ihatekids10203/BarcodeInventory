@@ -34,7 +34,7 @@ const productFormSchema = insertProductSchema.extend({
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 export default function ProductForm({ productId, onScanBarcode, onCancel, onSuccess }: ProductFormProps) {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   
   // Fetch product data if editing
@@ -132,12 +132,12 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
   };
   
   return (
-    <div className="absolute inset-0 bg-white z-10 p-4 overflow-y-auto">
+    <div className="absolute inset-0 bg-background dark:bg-background z-30 p-4 sm:p-6 overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={onCancel} className="text-primary p-0">
+        <Button variant="ghost" onClick={onCancel} className="text-primary p-0 hover:bg-transparent hover:text-primary/80">
           <i className="fas fa-arrow-left mr-2"></i>{t('back')}
         </Button>
-        <h2 className="text-lg font-medium">
+        <h2 className="text-xl font-medium">
           {productId ? t('editProduct') : t('addProduct')}
         </h2>
         <div className="w-20"></div> {/* Spacer for alignment */}
@@ -147,7 +147,7 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Image Upload */}
           <div className="mb-4">
-            <div className="relative bg-gray-100 h-48 rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="relative bg-muted/50 dark:bg-muted/20 h-48 sm:h-56 rounded-lg flex items-center justify-center overflow-hidden border border-dashed border-border">
               {imagePreview ? (
                 <img
                   src={imagePreview}
@@ -156,14 +156,14 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
                 />
               ) : (
                 <div className="text-center">
-                  <i className="fas fa-camera text-gray-400 text-2xl mb-2"></i>
-                  <p className="text-sm text-gray-500">{t('addPhoto')}</p>
+                  <i className="fas fa-camera text-muted-foreground text-3xl mb-3"></i>
+                  <p className="text-sm text-muted-foreground">{t('addPhoto')}</p>
                 </div>
               )}
               <input
                 type="file"
                 id="imageUpload"
-                className="absolute inset-0 opacity-0"
+                className="absolute inset-0 opacity-0 cursor-pointer"
                 accept="image/*"
                 onChange={handleImageUpload}
               />
@@ -255,7 +255,8 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
                     type="button"
                     variant="outline"
                     onClick={() => handleQuantityChange('decrement')}
-                    className="w-10 h-10 p-0 rounded-l-lg"
+                    className="w-12 h-12 p-0 rounded-l-lg bg-red-100 text-red-600 hover:bg-red-200 border-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 dark:border-red-800"
+                    disabled={field.value <= 0}
                   >
                     <i className="fas fa-minus"></i>
                   </Button>
@@ -264,7 +265,7 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
                       {...field}
                       type="number"
                       min="0"
-                      className="w-16 h-10 rounded-none text-center"
+                      className="w-20 h-12 rounded-none text-center border-x-0"
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     />
                   </FormControl>
@@ -272,7 +273,7 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
                     type="button"
                     variant="outline"
                     onClick={() => handleQuantityChange('increment')}
-                    className="w-10 h-10 p-0 rounded-r-lg"
+                    className="w-12 h-12 p-0 rounded-r-lg bg-green-100 text-green-600 hover:bg-green-200 border-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 dark:border-green-800"
                   >
                     <i className="fas fa-plus"></i>
                   </Button>

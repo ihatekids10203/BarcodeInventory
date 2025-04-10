@@ -41,17 +41,26 @@ export default function Scanner({ onBarcodeDetected, onCancel }: ScannerProps) {
   }, [error, toast]);
   
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center">
-      <div className="relative w-4/5 aspect-square max-w-[300px] border-2 border-white rounded-lg">
-        <div className="absolute w-full h-[2px] bg-primary top-1/2 animate-[scan_2s_linear_infinite]"></div>
+    <div className="fixed inset-0 bg-black/90 dark:bg-black/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
+      <div className="mb-6">
+        <h2 className="text-white text-xl font-medium text-center mb-2">{t('scanBarcode')}</h2>
+        <p className="text-white/80 text-center text-sm max-w-xs mx-auto">{t('scanInstructions')}</p>
       </div>
       
-      <div className="mt-8 text-white text-center">
-        <p className="mb-4">{t('scanInstructions')}</p>
+      <div className="relative w-4/5 aspect-square max-w-[300px] border-2 border-white/30 rounded-xl overflow-hidden">
+        <div className="absolute inset-0 border-4 border-primary/40 rounded-lg"></div>
+        <div className="absolute w-full h-[3px] bg-primary top-1/2 animate-[scan_2s_ease-in-out_infinite]"></div>
+        <div className="absolute left-0 top-0 w-12 h-12 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
+        <div className="absolute right-0 top-0 w-12 h-12 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
+        <div className="absolute left-0 bottom-0 w-12 h-12 border-b-4 border-l-4 border-primary rounded-bl-lg"></div>
+        <div className="absolute right-0 bottom-0 w-12 h-12 border-b-4 border-r-4 border-primary rounded-br-lg"></div>
+      </div>
+      
+      <div className="mt-10 text-center">
         <Button 
-          variant="secondary" 
+          variant="outline" 
           onClick={onCancel}
-          className="px-6 py-2 rounded-full font-medium"
+          className="px-8 py-2 rounded-full font-medium text-white border-white/30 hover:bg-white/10"
         >
           {t('cancel')}
         </Button>
