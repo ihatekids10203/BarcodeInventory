@@ -19,6 +19,7 @@ interface ProductFormProps {
   onScanBarcode: () => void;
   onCancel: () => void;
   onSuccess: () => void;
+  onBarcodeHandler?: (handler: (barcode: string) => Promise<void>) => void;
 }
 
 // Extend the product schema for the form
@@ -34,7 +35,7 @@ const productFormSchema = insertProductSchema.extend({
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
-export default function ProductForm({ productId, onScanBarcode, onCancel, onSuccess }: ProductFormProps) {
+export default function ProductForm({ productId, onScanBarcode, onCancel, onSuccess, onBarcodeHandler }: ProductFormProps) {
   const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   
@@ -77,6 +78,13 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
       }
     }
   }, [product, form]);
+  
+  // Register the barcode handler with the parent component
+  useEffect(() => {
+    if (onBarcodeHandler) {
+      onBarcodeHandler(updateBarcodeValue);
+    }
+  }, [onBarcodeHandler]);
   
   // Handle form submission
   const onSubmit = async (values: ProductFormValues) => {

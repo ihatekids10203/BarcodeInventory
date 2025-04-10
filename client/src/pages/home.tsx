@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '@/components/header';
 import BottomNav from '@/components/bottom-nav';
 import ProductList from '@/components/product-list';
@@ -77,10 +77,14 @@ export default function Home() {
     });
   };
   
+  // Create a reference to the form's updateBarcodeValue function
+  const updateBarcodeValueRef = useRef<(barcode: string) => void>();
+  
   // When scanned barcode changes, pass it to the form
   useEffect(() => {
-    if (scannedBarcode && activeView === 'productForm') {
-      // The form will receive this value
+    if (scannedBarcode && activeView === 'productForm' && updateBarcodeValueRef.current) {
+      // Call the form's barcode update function
+      updateBarcodeValueRef.current(scannedBarcode);
     }
   }, [scannedBarcode, activeView]);
   
@@ -103,6 +107,9 @@ export default function Home() {
             onScanBarcode={handleScanBarcode}
             onCancel={() => setActiveView('productList')}
             onSuccess={handleFormSuccess}
+            onBarcodeHandler={(handler) => {
+              updateBarcodeValueRef.current = handler;
+            }}
           />
         )}
         
