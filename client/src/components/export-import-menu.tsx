@@ -98,34 +98,37 @@ export default function ExportImportMenu({ onExport, onImport, onSettings, onClo
   };
   
   return (
-    <div className="absolute right-4 top-16 bg-white shadow-lg rounded-lg z-20 w-48">
-      <div className="py-2">
-        <button 
-          className="w-full text-left px-4 py-2 hover:bg-gray-100" 
-          onClick={handleExport}
-        >
-          <i className="fas fa-download mr-2 text-primary"></i>{t('exportData')}
-        </button>
-        <button 
-          className="w-full text-left px-4 py-2 hover:bg-gray-100" 
-          onClick={handleImportClick}
-        >
-          <i className="fas fa-upload mr-2 text-primary"></i>{t('importData')}
-        </button>
-        <button 
-          className="w-full text-left px-4 py-2 hover:bg-gray-100" 
-          onClick={onSettings}
-        >
-          <i className="fas fa-cog mr-2 text-primary"></i>{t('settings')}
-        </button>
+    <>
+      <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-10" onClick={onClose} />
+      <div className="absolute right-4 top-16 bg-card dark:bg-card shadow-lg rounded-lg z-20 w-56 border border-border overflow-hidden">
+        <div className="py-1">
+          <button 
+            className="w-full text-left px-4 py-3 hover:bg-accent/50 transition-colors flex items-center" 
+            onClick={handleExport}
+          >
+            <i className="fas fa-download mr-3 text-primary"></i>{t('exportData')}
+          </button>
+          <button 
+            className="w-full text-left px-4 py-3 hover:bg-accent/50 transition-colors flex items-center" 
+            onClick={handleImportClick}
+          >
+            <i className="fas fa-upload mr-3 text-primary"></i>{t('importData')}
+          </button>
+          <button 
+            className="w-full text-left px-4 py-3 hover:bg-accent/50 transition-colors flex items-center" 
+            onClick={onSettings}
+          >
+            <i className="fas fa-cog mr-3 text-primary"></i>{t('settings')}
+          </button>
+        </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept=".json"
+          onChange={handleFileChange}
+        />
       </div>
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept=".json"
-        onChange={handleFileChange}
-      />
-    </div>
+    </>
   );
 }

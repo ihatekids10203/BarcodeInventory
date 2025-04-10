@@ -4,6 +4,7 @@ import { t } from '@/lib/translations';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import QuantityControl from '@/components/quantity-control';
 
 interface ProductCardProps {
   product: Product;
@@ -95,29 +96,12 @@ export default function ProductCard({ product, onEdit }: ProductCardProps) {
           <div className="flex items-center">
             <span className="text-xs text-muted-foreground">{product.barcode}</span>
           </div>
-          <div className="flex items-center bg-muted rounded-lg px-2 py-1">
-            <button 
-              className={`w-7 h-7 flex items-center justify-center ${
-                product.quantity > 0 
-                  ? 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800' 
-                  : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
-              } rounded-full focus:outline-none transition-colors`}
-              onClick={handleDecrement}
-              disabled={isUpdating || product.quantity <= 0}
-              aria-label={t('decrementQuantity')}
-            >
-              <i className="fas fa-minus text-xs"></i>
-            </button>
-            <span className="mx-2 text-sm font-medium">{product.quantity}</span>
-            <button 
-              className="w-7 h-7 flex items-center justify-center bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 rounded-full focus:outline-none transition-colors"
-              onClick={handleIncrement}
-              disabled={isUpdating}
-              aria-label={t('incrementQuantity')}
-            >
-              <i className="fas fa-plus text-xs"></i>
-            </button>
-          </div>
+          <QuantityControl 
+            quantity={product.quantity}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            isUpdating={isUpdating}
+          />
         </div>
       </div>
     </div>
