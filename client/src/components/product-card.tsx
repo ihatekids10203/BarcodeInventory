@@ -42,15 +42,20 @@ export default function ProductCard({ product, onEdit }: ProductCardProps) {
     try {
       setIsUpdating(true);
       const updatedQuantity = product.quantity - 1;
-      await apiRequest('PATCH', `/api/products/${product.id}`, { quantity: updatedQuantity });
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       
       if (updatedQuantity === 0) {
+        // Remove the product if quantity reaches zero
+        await apiRequest('DELETE', `/api/products/${product.id}`, {});
+        queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+        
         toast({
-          description: t('productOutOfStock'),
-          variant: 'destructive',
+          description: t('productRemoved'),
         });
       } else {
+        // Just update the quantity
+        await apiRequest('PATCH', `/api/products/${product.id}`, { quantity: updatedQuantity });
+        queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+        
         toast({
           description: t('quantityUpdated'),
         });

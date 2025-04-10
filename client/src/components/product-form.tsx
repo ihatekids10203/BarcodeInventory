@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { insertProductSchema, Product, Category } from '@shared/schema';
 import { t } from '@/lib/translations';
+import { lookupBarcode } from '@/lib/barcodeApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -121,8 +122,46 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
   };
   
   // Handle barcode input from scanner
-  const updateBarcodeValue = (barcode: string) => {
+  const updateBarcodeValue = async (barcode: string) => {
     form.setValue('barcode', barcode);
+    
+    // If we're adding a new product (not editing), try to fetch product info from barcode
+    if (!productId) {
+      try {
+        // Show loading toast
+        toast({
+          description: t('lookingUpBarcode'),
+        });
+        
+        // Lookup product info from barcode
+        const productInfo = await lookupBarcode(barcode);
+        
+        if (productInfo && productInfo.name) {
+          // Update form with fetched info
+          form.setValue('name', productInfo.name);
+          
+          // If there's an image, set it too
+          if (productInfo.image) {
+            form.setValue('image', productInfo.image);
+            setImagePreview(productInfo.image);
+          }
+          
+          toast({
+            description: t('productInfoFound'),
+          });
+        } else {
+          toast({
+            description: t('noProductInfoFound'),
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching product info:', error);
+        toast({
+          description: t('barcodeSearchFailed'),
+          variant: 'destructive',
+        });
+      }
+    }
   };
   
   const handleQuantityChange = (action: 'increment' | 'decrement') => {

@@ -38,6 +38,10 @@ const translations = {
   // Scanner
   scanBarcode: 'Barcode scannen',
   scanInstructions: 'Barcode zum Scannen in das Feld zentrieren',
+  lookingUpBarcode: 'Suche Produktinformationen...',
+  productInfoFound: 'Produktinformationen gefunden',
+  noProductInfoFound: 'Keine Produktinformationen gefunden',
+  barcodeSearchFailed: 'Fehler bei der Suche nach Barcode',
   
   // Import/export
   exportData: 'Daten exportieren',
@@ -49,6 +53,7 @@ const translations = {
   productCreated: 'Produkt erfolgreich hinzugefügt',
   productUpdated: 'Produkt erfolgreich aktualisiert',
   productDeleted: 'Produkt erfolgreich gelöscht',
+  productRemoved: 'Produkt entfernt',
   quantityUpdated: 'Menge aktualisiert',
   productOutOfStock: 'Produkt nicht mehr auf Lager',
   exportSuccess: 'Daten erfolgreich exportiert',
