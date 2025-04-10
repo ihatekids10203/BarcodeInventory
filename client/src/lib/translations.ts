@@ -43,6 +43,7 @@ const translations = {
   exportData: 'Daten exportieren',
   importData: 'Daten importieren',
   settings: 'Einstellungen',
+  feature: 'Funktion',
   
   // Messages
   productCreated: 'Produkt erfolgreich hinzugefügt',
@@ -72,6 +73,8 @@ const translations = {
 /**
  * Translate key to German
  */
-export function t(key: keyof typeof translations): string {
-  return translations[key] || key;
+export function t(key: string): string {
+  return key in translations 
+    ? translations[key as keyof typeof translations] 
+    : key;
 }

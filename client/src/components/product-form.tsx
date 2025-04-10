@@ -68,7 +68,7 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
         barcode: product.barcode,
         quantity: product.quantity,
         categoryId: product.categoryId,
-        image: product.image,
+        image: product.image || undefined,
       });
       
       if (product.image) {
@@ -256,7 +256,7 @@ export default function ProductForm({ productId, onScanBarcode, onCancel, onSucc
                     variant="outline"
                     onClick={() => handleQuantityChange('decrement')}
                     className="w-12 h-12 p-0 rounded-l-lg bg-red-100 text-red-600 hover:bg-red-200 border-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 dark:border-red-800"
-                    disabled={field.value <= 0}
+                    disabled={!!field.value && field.value <= 0}
                   >
                     <i className="fas fa-minus"></i>
                   </Button>

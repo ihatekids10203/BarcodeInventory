@@ -85,17 +85,17 @@ export default function Home() {
   }, [scannedBarcode, activeView]);
   
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header 
         onExport={handleExport}
         onImport={handleImport}
         onSettings={handleSettings}
       />
       
-      <div className="flex-1 overflow-y-auto relative">
-        {activeView === 'productList' && (
+      <div className="flex-1 overflow-hidden relative">
+        <div className={`${activeView === 'productList' ? 'block' : 'hidden'}`}>
           <ProductList onEditProduct={handleEditProduct} />
-        )}
+        </div>
         
         {activeView === 'productForm' && (
           <ProductForm
@@ -114,11 +114,13 @@ export default function Home() {
         )}
       </div>
       
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onAddProduct={handleAddProduct}
-      />
-    </>
+      {activeView === 'productList' && (
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onAddProduct={handleAddProduct}
+        />
+      )}
+    </div>
   );
 }
