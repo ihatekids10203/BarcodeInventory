@@ -69,19 +69,19 @@ export default function ProductCard({ product, onEdit }: ProductCardProps) {
   const productImage = product.image || 'https://via.placeholder.com/300x200/f3f4f6/a0aec0?text=Kein+Bild';
   
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
+    <div className="bg-card dark:bg-card rounded-lg shadow-md overflow-hidden border border-border hover:shadow-lg transition-all">
       <div className="relative">
         <img 
           src={productImage}
           alt={product.name} 
-          className="w-full h-32 object-cover"
+          className="w-full h-40 sm:h-32 object-cover"
           onError={(e) => {
             e.currentTarget.src = 'https://via.placeholder.com/300x200/f3f4f6/a0aec0?text=Bild+Fehler';
           }}
         />
-        <div className="absolute top-2 right-2 bg-white p-1 rounded-full shadow">
+        <div className="absolute top-2 right-2 bg-background/80 dark:bg-background/60 backdrop-blur-sm p-2 rounded-full shadow">
           <button 
-            className="text-gray-700 hover:text-primary"
+            className="text-foreground hover:text-primary transition-colors"
             onClick={() => onEdit(product.id)}
             aria-label={t('editProduct')}
           >
@@ -89,17 +89,19 @@ export default function ProductCard({ product, onEdit }: ProductCardProps) {
           </button>
         </div>
       </div>
-      <div className="p-3">
-        <h3 className="font-medium text-sm mb-1">{product.name}</h3>
+      <div className="p-4">
+        <h3 className="font-medium text-base mb-2">{product.name}</h3>
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <span className="text-xs text-gray-500">{product.barcode}</span>
+            <span className="text-xs text-muted-foreground">{product.barcode}</span>
           </div>
-          <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1">
+          <div className="flex items-center bg-muted rounded-lg px-2 py-1">
             <button 
-              className={`w-6 h-6 flex items-center justify-center ${
-                product.quantity > 0 ? 'text-gray-700 hover:text-primary' : 'text-gray-400'
-              } focus:outline-none`}
+              className={`w-7 h-7 flex items-center justify-center ${
+                product.quantity > 0 
+                  ? 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800' 
+                  : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
+              } rounded-full focus:outline-none transition-colors`}
               onClick={handleDecrement}
               disabled={isUpdating || product.quantity <= 0}
               aria-label={t('decrementQuantity')}
@@ -108,7 +110,7 @@ export default function ProductCard({ product, onEdit }: ProductCardProps) {
             </button>
             <span className="mx-2 text-sm font-medium">{product.quantity}</span>
             <button 
-              className="w-6 h-6 flex items-center justify-center text-gray-700 hover:text-primary focus:outline-none"
+              className="w-7 h-7 flex items-center justify-center bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 rounded-full focus:outline-none transition-colors"
               onClick={handleIncrement}
               disabled={isUpdating}
               aria-label={t('incrementQuantity')}
